@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationScheleton.Models;
 using WebApplicationScheleton.Services;
+using AutoMapper;
 
 namespace WebApplicationScheleton.Controllers
 {
@@ -16,6 +17,7 @@ namespace WebApplicationScheleton.Controllers
     public class UserController : Controller
     {
         private readonly DataContext _context;
+        private IMapper _mapper;
 
         public UserController(DataContext context)
         {
@@ -36,7 +38,7 @@ namespace WebApplicationScheleton.Controllers
                 return Ok();
             }
 
-            catch (AppException ex)
+            catch (Exception ex)
             {
                 // return error message if there was an exception
                 return BadRequest(ex.Message);
