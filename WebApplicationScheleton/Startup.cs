@@ -13,6 +13,8 @@ using WebApplicationScheleton.Models;
 using WebApplicationScheleton.Services;
 
 using AutoMapper;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace WebApplicationScheleton
 {
@@ -37,6 +39,40 @@ namespace WebApplicationScheleton
             // añadimos automapper para poder mapear facilmente de modelos a DTO 
             // para que exista esta funciona hay que poner la extension de DI de automaper
             services.AddAutoMapper();
+
+
+            // configure strongly typed settings objects
+            // para crear un objeto setting que va tipado
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+
+            // configure jwt authentication
+
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = System.Text.Encoding.ASCII.GetBytes(appSettings.Secret);
+            services.AddAuthentication(x =>
+
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
+            // configure DI for application services
+            services.AddScoped<IUserService, UserService>();
+           
+
 
         }
 

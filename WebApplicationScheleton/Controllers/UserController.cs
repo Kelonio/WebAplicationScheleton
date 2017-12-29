@@ -13,6 +13,8 @@ using AutoMapper;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace WebApplicationScheleton.Controllers
 {
@@ -23,19 +25,60 @@ namespace WebApplicationScheleton.Controllers
         private readonly DataContext _context;
         private IMapper _mapper;
         private IUserService _userService;
+        private readonly AppSettings _appSettings;
 
         public UserController(
             DataContext context,
             IUserService userService,
-            IMapper mapper
-            //IOptions<AppSettings> appSettings,
+            IMapper mapper,
+            IOptions<AppSettings> appSettings
             )
         {
             _context = context;
             _userService = userService;
             _mapper = mapper;
+            _appSettings = appSettings.Value;
+
         }
 
+
+        [AllowAnonymous]
+        [HttpPost("authenticate")]
+        public IActionResult Authenticate([FromBody]UserDto userDto)
+        {
+            var user = _userService.Authenticate(userDto.Username, userDto.Password);
+
+            if (user == null)
+                return Unauthorized();
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, user.UserId.ToString())
+                }),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+
+            // return basic user info (without password) and token to store client side
+            return Ok(new
+            {
+                Id = user.UserId,
+                Username = user.Username,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Token = tokenString
+            });
+
+        }
 
         [AllowAnonymous]
         [HttpPost]
@@ -57,7 +100,7 @@ namespace WebApplicationScheleton.Controllers
             }
         }
 
-
+        /*
 
         // codigo autogenerado 
 
@@ -162,5 +205,8 @@ namespace WebApplicationScheleton.Controllers
         {
             return _context.User.Any(e => e.UserId == id);
         }
+
+        */
+
     }
 }

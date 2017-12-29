@@ -1,3 +1,7 @@
 ﻿export class AppConfig {
-    public readonly apiUrl = 'http://localhost:52364';
+
+    /* configuracion para desarrollo, supongo que en produccion no hay que poner el puerto*/
+    /* se saca de properties lauchsettings.json */
+
+    public readonly apiUrl = 'http://localhost:60231/';
 };
