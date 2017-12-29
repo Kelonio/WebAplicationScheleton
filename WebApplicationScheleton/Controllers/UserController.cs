@@ -10,6 +10,10 @@ using WebApplicationScheleton.Models;
 using WebApplicationScheleton.Services;
 using AutoMapper;
 
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+
 namespace WebApplicationScheleton.Controllers
 {
     [Produces("application/json")]
@@ -18,10 +22,18 @@ namespace WebApplicationScheleton.Controllers
     {
         private readonly DataContext _context;
         private IMapper _mapper;
+        private IUserService _userService;
 
-        public UserController(DataContext context)
+        public UserController(
+            DataContext context,
+            IUserService userService,
+            IMapper mapper
+            //IOptions<AppSettings> appSettings,
+            )
         {
             _context = context;
+            _userService = userService;
+            _mapper = mapper;
         }
 
 
