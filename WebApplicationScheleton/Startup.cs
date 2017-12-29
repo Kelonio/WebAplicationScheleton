@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using WebApplicationScheleton.Models;
 using WebApplicationScheleton.Services;
 
+using AutoMapper;
+
 namespace WebApplicationScheleton
 {
     public class Startup
@@ -32,6 +34,9 @@ namespace WebApplicationScheleton
             var connection = @"Server=localhost\SQLEXPRESS;Database=WebAppScheleton;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<DataContext>(options => options.UseSqlServer(connection));
 
+            // añadimos automapper para poder mapear facilmente de modelos a DTO 
+            // para que exista esta funciona hay que poner la extension de DI de automaper
+            services.AddAutoMapper();
 
         }
 
